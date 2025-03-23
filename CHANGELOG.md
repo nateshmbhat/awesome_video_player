@@ -1,3 +1,7 @@
+
+### 1.0.3
+* Updates flutter_widget_from_html_core to latest version
+
 ### 1.0.2
 * Updates Readme with relevant info 
 
