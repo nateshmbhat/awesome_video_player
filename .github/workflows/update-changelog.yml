@@ -1,0 +1,41 @@
+name: Update Changelog on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update CHANGELOG.md
+        run: |
+          # Get release info
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          RELEASE_NAME="${{ github.event.release.name }}"
+          RELEASE_BODY="${{ github.event.release.body }}"
+
+          # Format release date
+          RELEASE_DATE=$(date +"%Y-%m-%d")
+
+          # Create the new changelog entry
+          NEW_ENTRY="## ${RELEASE_NAME} (${RELEASE_DATE})\n\n${RELEASE_BODY}\n\n"
+
+          # Prepend the new entry to the CHANGELOG.md file
+          echo -e "${NEW_ENTRY}$(cat CHANGELOG.md)" > CHANGELOG.md
+
+          # Configure Git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Commit and push the changes
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md for release ${RELEASE_TAG}"
+          git push
