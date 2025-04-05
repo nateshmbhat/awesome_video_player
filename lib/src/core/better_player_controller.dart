@@ -470,6 +470,7 @@ class BetterPlayerController {
               _betterPlayerDataSource?.notificationConfiguration?.activityName,
           clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey,
           videoExtension: _betterPlayerDataSource!.videoExtension,
+          allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ?? betterPlayerConfiguration.allowedScreenSleep,
         );
 
         break;
@@ -515,7 +516,8 @@ class BetterPlayerController {
               overriddenDuration: _betterPlayerDataSource!.overriddenDuration,
               activityName: _betterPlayerDataSource
                   ?.notificationConfiguration?.activityName,
-              clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey);
+              clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey,
+              allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ?? betterPlayerConfiguration.allowedScreenSleep);
           _tempFiles.add(file);
         } else {
           throw ArgumentError("Couldn't create file from memory.");

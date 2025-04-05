@@ -227,6 +227,7 @@ class DataSource {
     this.activityName,
     this.clearKey,
     this.videoExtension,
+    this.allowedScreenSleep,
   }) : assert(uri == null || asset == null);
 
   /// Describes the type of data source this [VideoPlayerController]
@@ -304,6 +305,10 @@ class DataSource {
   final String? clearKey;
 
   final String? videoExtension;
+
+  /// Whether the screen should be allowed to sleep during video playback.
+  /// Defaults to null, which means the platform default behavior is used.
+  final bool? allowedScreenSleep;
 
   /// Key to compare DataSource
   String get key {

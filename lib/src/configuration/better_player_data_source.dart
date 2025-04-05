@@ -76,6 +76,10 @@ class BetterPlayerDataSource {
   ///platform.
   final BetterPlayerBufferingConfiguration bufferingConfiguration;
 
+  ///Whether the screen should be allowed to sleep during video playback.
+  ///Defaults to null, which means the value from BetterPlayerConfiguration will be used.
+  final bool? allowedScreenSleep;
+
   BetterPlayerDataSource(
     this.type,
     this.url, {
@@ -99,6 +103,7 @@ class BetterPlayerDataSource {
     this.drmConfiguration,
     this.placeholder,
     this.bufferingConfiguration = const BetterPlayerBufferingConfiguration(),
+    this.allowedScreenSleep,
   }) : assert(
             (type == BetterPlayerDataSourceType.network ||
                     type == BetterPlayerDataSourceType.file) ||

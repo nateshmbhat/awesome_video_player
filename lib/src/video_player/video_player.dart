@@ -335,6 +335,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     String? activityName,
     String? clearKey,
     String? videoExtension,
+    bool? allowedScreenSleep,
   }) {
     return _setDataSource(
       DataSource(
@@ -358,6 +359,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         activityName: activityName,
         clearKey: clearKey,
         videoExtension: videoExtension,
+        allowedScreenSleep: allowedScreenSleep,
       ),
     );
   }
@@ -374,7 +376,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       String? notificationChannelName,
       Duration? overriddenDuration,
       String? activityName,
-      String? clearKey}) {
+      String? clearKey,
+      bool? allowedScreenSleep}) {
     return _setDataSource(
       DataSource(
           sourceType: DataSourceType.file,
@@ -386,7 +389,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           notificationChannelName: notificationChannelName,
           overriddenDuration: overriddenDuration,
           activityName: activityName,
-          clearKey: clearKey),
+          clearKey: clearKey,
+          allowedScreenSleep: allowedScreenSleep),
     );
   }
 

@@ -315,6 +315,12 @@ bool _remoteCommandsInitialized = false;
             if ([dataSource objectForKey:@"overriddenDuration"] != [NSNull null]){
                 overriddenDuration = [dataSource[@"overriddenDuration"] intValue];
             }
+            
+            BOOL allowedScreenSleep = true; // Default value
+            id allowedScreenSleepObject = [dataSource objectForKey:@"allowedScreenSleep"];
+            if (allowedScreenSleepObject != [NSNull null]) {
+                allowedScreenSleep = [[dataSource objectForKey:@"allowedScreenSleep"] boolValue];
+            }
 
             BOOL useCache = false;
             id useCacheObject = [dataSource objectForKey:@"useCache"];
@@ -337,9 +343,9 @@ bool _remoteCommandsInitialized = false;
                 } else {
                     assetPath = [_registrar lookupKeyForAsset:assetArg];
                 }
-                [player setDataSourceAsset:assetPath withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration];
+                [player setDataSourceAsset:assetPath withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration allowedScreenSleep:allowedScreenSleep];
             } else if (uriArg) {
-                [player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl withHeaders:headers withCache: useCache cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration videoExtension: videoExtension];
+                [player setDataSourceURL:[NSURL URLWithString:uriArg] withKey:key withCertificateUrl:certificateUrl withLicenseUrl: licenseUrl withHeaders:headers withCache: useCache cacheKey:cacheKey cacheManager:_cacheManager overriddenDuration:overriddenDuration videoExtension: videoExtension allowedScreenSleep:allowedScreenSleep];
             } else {
                 result(FlutterMethodNotImplemented);
             }

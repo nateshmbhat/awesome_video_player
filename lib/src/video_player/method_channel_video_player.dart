@@ -70,7 +70,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
           'imageUrl': dataSource.imageUrl,
           'notificationChannelName': dataSource.notificationChannelName,
           'overriddenDuration': dataSource.overriddenDuration?.inMilliseconds,
-          'activityName': dataSource.activityName
+          'activityName': dataSource.activityName,
+          'allowedScreenSleep': dataSource.allowedScreenSleep
         };
         break;
       case DataSourceType.network:
@@ -95,6 +96,7 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
           'activityName': dataSource.activityName,
           'clearKey': dataSource.clearKey,
           'videoExtension': dataSource.videoExtension,
+          'allowedScreenSleep': dataSource.allowedScreenSleep
         };
         break;
       case DataSourceType.file:
@@ -111,7 +113,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
           'notificationChannelName': dataSource.notificationChannelName,
           'overriddenDuration': dataSource.overriddenDuration?.inMilliseconds,
           'activityName': dataSource.activityName,
-          'clearKey': dataSource.clearKey
+          'clearKey': dataSource.clearKey,
+          'allowedScreenSleep': dataSource.allowedScreenSleep
         };
         break;
     }

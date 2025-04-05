@@ -74,5 +74,6 @@ class MockVideoPlayerController extends VideoPlayerController {
     String? activityName,
     String? clearKey,
     String? videoExtension,
+    bool? allowedScreenSleep,
   }) async {}
 }
