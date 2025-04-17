@@ -1,40 +1,41 @@
 package uz.shs.better_player_plus
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import androidx.media3.database.ExoDatabaseProvider
+
+import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import java.io.File
-import java.lang.Exception
 
+@SuppressLint("UnsafeOptInUsageError")
 object BetterPlayerCache {
+
     @Volatile
     private var instance: SimpleCache? = null
+
     fun createCache(context: Context, cacheFileSize: Long): SimpleCache? {
-        if (instance == null) {
-            synchronized(BetterPlayerCache::class.java) {
-                if (instance == null) {
-                    instance = SimpleCache(
-                        File(context.cacheDir, "betterPlayerCache"),
-                        LeastRecentlyUsedCacheEvictor(cacheFileSize),
-                        ExoDatabaseProvider(context)
-                    )
-                }
+        return instance ?: synchronized(this) {
+            instance ?: SimpleCache(
+                File(context.cacheDir, "betterPlayerCache"),
+                LeastRecentlyUsedCacheEvictor(cacheFileSize),
+                StandaloneDatabaseProvider(context)
+            ).also {
+                instance = it
             }
         }
-        return instance
     }
 
     @JvmStatic
     fun releaseCache() {
         try {
-            if (instance != null) {
-                instance!!.release()
+            instance?.let {
+                it.release()
                 instance = null
             }
         } catch (exception: Exception) {
-            Log.e("BetterPlayerCache", exception.toString())
+            Log.e("BetterPlayerCache", "Error releasing cache: ${exception.localizedMessage}", exception)
         }
     }
 }

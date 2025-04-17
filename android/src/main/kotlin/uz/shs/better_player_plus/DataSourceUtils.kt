@@ -1,53 +1,39 @@
 package uz.shs.better_player_plus
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 
+@SuppressLint("UnsafeOptInUsageError")
 internal object DataSourceUtils {
     private const val USER_AGENT = "User-Agent"
     private const val USER_AGENT_PROPERTY = "http.agent"
 
     @JvmStatic
-    fun getUserAgent(headers: Map<String, String>?): String? {
-        var userAgent = System.getProperty(USER_AGENT_PROPERTY)
-        if (headers != null && headers.containsKey(USER_AGENT)) {
-            val userAgentHeader = headers[USER_AGENT]
-            if (userAgentHeader != null) {
-                userAgent = userAgentHeader
-            }
-        }
-        return userAgent
+    fun getUserAgent(headers: Map<String, String>?): String {
+        return headers?.get(USER_AGENT) ?: System.getProperty(USER_AGENT_PROPERTY) ?: "DefaultUserAgent"
     }
 
     @JvmStatic
-    fun getDataSourceFactory(
-        userAgent: String?,
-        headers: Map<String, String>?
-    ): DataSource.Factory {
-        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+    fun getDataSourceFactory(userAgent: String?, headers: Map<String, String>?): DataSource.Factory {
+        // Initialize DefaultHttpDataSource.Factory with user agent and defaults
+        val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent(userAgent)
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS)
             .setReadTimeoutMs(DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS)
-        if (headers != null) {
-            val notNullHeaders = mutableMapOf<String, String>()
-            headers.forEach { entry ->
-                notNullHeaders[entry.key] = entry.value
-            }
-            (dataSourceFactory as DefaultHttpDataSource.Factory).setDefaultRequestProperties(
-                notNullHeaders
-            )
+
+        // Set request headers if provided
+        headers?.let {
+            dataSourceFactory.setDefaultRequestProperties(it)
         }
+
         return dataSourceFactory
     }
 
     @JvmStatic
     fun isHTTP(uri: Uri?): Boolean {
-        if (uri == null || uri.scheme == null) {
-            return false
-        }
-        val scheme = uri.scheme
-        return scheme == "http" || scheme == "https"
+        return uri?.scheme in listOf("http", "https")
     }
 }

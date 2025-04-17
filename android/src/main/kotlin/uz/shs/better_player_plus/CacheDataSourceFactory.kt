@@ -1,5 +1,6 @@
 package uz.shs.better_player_plus
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -8,13 +9,22 @@ import androidx.media3.datasource.cache.CacheDataSink
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 
+@SuppressLint("UnsafeOptInUsageError")
 internal class CacheDataSourceFactory(
-    private val context: Context,
+    val context: Context,
     private val maxCacheSize: Long,
     private val maxFileSize: Long,
-    upstreamDataSource: DataSource.Factory?
+    upstreamDataSource: DataSource.Factory? = null
 ) : DataSource.Factory {
-    private var defaultDatasourceFactory: DefaultDataSource.Factory? = null
+
+    private var defaultDatasourceFactory: DefaultDataSource.Factory?=null
+
+    init {
+        val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
+        defaultDatasourceFactory = upstreamDataSource?.let { DefaultDataSource.Factory(context, it) }
+        defaultDatasourceFactory?.setTransferListener(bandwidthMeter)
+    }
+
     override fun createDataSource(): CacheDataSource {
         val betterPlayerCache = BetterPlayerCache.createCache(context, maxCacheSize)
             ?: throw IllegalStateException("Cache can't be null.")
@@ -27,13 +37,5 @@ internal class CacheDataSourceFactory(
             CacheDataSource.FLAG_BLOCK_ON_CACHE or CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
             null
         )
-    }
-
-    init {
-        val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
-        upstreamDataSource?.let {
-            defaultDatasourceFactory = DefaultDataSource.Factory(context, upstreamDataSource)
-            defaultDatasourceFactory?.setTransferListener(bandwidthMeter)
-        }
     }
 }
