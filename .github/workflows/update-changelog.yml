@@ -38,4 +38,4 @@ jobs:
           # Commit and push the changes
           git add CHANGELOG.md
           git commit -m "docs: update CHANGELOG.md for release ${RELEASE_TAG}"
-          git push
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
