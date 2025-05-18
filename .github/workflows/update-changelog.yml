@@ -3,6 +3,17 @@ name: Update Changelog on Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v1.0.5)'
+        required: true
+      release_name:
+        description: 'Release name (e.g., Version 1.0.5)'
+        required: true
+      release_body:
+        description: 'Release notes/changelog content'
+        required: true
 
 jobs:
   update-changelog:
@@ -17,10 +28,16 @@ jobs:
 
       - name: Update CHANGELOG.md
         run: |
-          # Get release info
-          RELEASE_TAG="${{ github.event.release.tag_name }}"
-          RELEASE_NAME="${{ github.event.release.name }}"
-          RELEASE_BODY="${{ github.event.release.body }}"
+          # Get release info based on trigger type
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            RELEASE_NAME="${{ github.event.release.name }}"
+            RELEASE_BODY="${{ github.event.release.body }}"
+          else
+            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
+            RELEASE_NAME="${{ github.event.inputs.release_name }}"
+            RELEASE_BODY="${{ github.event.inputs.release_body }}"
+          fi
 
           # Format release date
           RELEASE_DATE=$(date +"%Y-%m-%d")
