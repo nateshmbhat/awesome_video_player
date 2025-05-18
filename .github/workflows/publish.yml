@@ -1,0 +1,64 @@
+name: Publish to pub.dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package version to publish"
+        required: true
+        default: ""
+      dry_run:
+        description: "Perform a dry run of the publish (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.13.0"
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Setup Pub Credentials
+        shell: bash
+        env:
+          PUB_DEV_ACCESS_TOKEN: ${{ secrets.PUB_DEV_ACCESS_TOKEN }}
+          PUB_DEV_REFRESH_TOKEN: ${{ secrets.PUB_DEV_REFRESH_TOKEN }}
+          PUB_DEV_ID_TOKEN: ${{ secrets.PUB_DEV_ID_TOKEN }}
+          PUB_DEV_TOKEN_ENDPOINT: ${{ secrets.PUB_DEV_TOKEN_ENDPOINT }}
+          PUB_DEV_EXPIRATION: ${{ secrets.PUB_DEV_EXPIRATION }}
+        run: |
+          mkdir -p ~/.config/dart
+          cat <<EOF > ~/.config/dart/pub-credentials.json
+          {
+            "accessToken":"${PUB_DEV_ACCESS_TOKEN}",
+            "refreshToken":"${PUB_DEV_REFRESH_TOKEN}",
+            "idToken":"${PUB_DEV_ID_TOKEN}",
+            "tokenEndpoint":"${PUB_DEV_TOKEN_ENDPOINT}",
+            "scopes":["https://www.googleapis.com/auth/userinfo.email","openid"],
+            "expiration":${PUB_DEV_EXPIRATION}
+          }
+          EOF
+
+      - name: Publish package
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            flutter pub publish --dry-run
+          else
+            flutter pub publish
+          fi
