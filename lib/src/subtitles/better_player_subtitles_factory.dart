@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:awesome_video_player/awesome_video_player.dart';
 import 'package:awesome_video_player/src/core/better_player_utils.dart';
+import 'package:meta/meta.dart';
+
 import 'better_player_subtitle.dart';
 
 class BetterPlayerSubtitlesFactory {
@@ -27,7 +30,7 @@ class BetterPlayerSubtitlesFactory {
         final file = File(url!);
         if (file.existsSync()) {
           final String fileContent = await file.readAsString();
-          final subtitlesCache = _parseString(fileContent);
+          final subtitlesCache = parseString(fileContent);
           subtitles.addAll(subtitlesCache);
         } else {
           BetterPlayerUtils.log("$url doesn't exist!");
@@ -55,7 +58,7 @@ class BetterPlayerSubtitlesFactory {
         });
         final response = await request.close();
         final data = await response.transform(const Utf8Decoder()).join();
-        final cacheList = _parseString(data);
+        final cacheList = parseString(data);
         subtitles.addAll(cacheList);
       }
       client.close();
@@ -72,14 +75,15 @@ class BetterPlayerSubtitlesFactory {
   static List<BetterPlayerSubtitle> _parseSubtitlesFromMemory(
       BetterPlayerSubtitlesSource source) {
     try {
-      return _parseString(source.content!);
+      return parseString(source.content!);
     } on Exception catch (exception) {
       BetterPlayerUtils.log("Failed to read subtitles from memory: $exception");
     }
     return [];
   }
 
-  static List<BetterPlayerSubtitle> _parseString(String value) {
+  @visibleForTesting
+  static List<BetterPlayerSubtitle> parseString(String value) {
     List<String> components = value.split('\r\n\r\n');
     if (components.length == 1) {
       components = value.split('\n\n');
@@ -92,11 +96,19 @@ class BetterPlayerSubtitlesFactory {
 
     final List<BetterPlayerSubtitle> subtitlesObj = [];
 
-    final bool isWebVTT = components.contains("WEBVTT");
+    final bool isWebVTT = components.contains("WEBVTT") ||
+        components.any((c) => c.trim().startsWith("WEBVTT"));
+
     for (final component in components) {
       if (component.isEmpty) {
         continue;
       }
+
+      // Skip WebVTT header and metadata sections
+      if (isWebVTT && BetterPlayerSubtitle.shouldRejectWebVTTBlock(component)) {
+        continue;
+      }
+
       final subtitle = BetterPlayerSubtitle(component, isWebVTT);
       if (subtitle.start != null &&
           subtitle.end != null &&
