@@ -50,7 +50,7 @@ class _HlsSubtitlesPageState extends State<HlsSubtitlesPage> {
             ));
     BetterPlayerDataSource dataSource = BetterPlayerDataSource(
         BetterPlayerDataSourceType.network, Constants.hlsPlaylistUrl,
-        useAsmsSubtitles: true);
+        useAsmsSubtitles: true, videoFormat: BetterPlayerVideoFormat.hls);
     _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
     _betterPlayerController.setupDataSource(dataSource);
     super.initState();
