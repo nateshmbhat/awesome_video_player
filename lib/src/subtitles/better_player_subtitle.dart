@@ -16,6 +16,11 @@ class BetterPlayerSubtitle {
 
   factory BetterPlayerSubtitle(String value, bool isWebVTT) {
     try {
+      // If this is WebVTT content, check if it should be rejected
+      if (isWebVTT && shouldRejectWebVTTBlock(value)) {
+        return BetterPlayerSubtitle._();
+      }
+
       final scanner = value.split('\n');
       if (scanner.length == 2) {
         return _handle2LinesSubtitles(scanner);
@@ -28,6 +33,42 @@ class BetterPlayerSubtitle {
       BetterPlayerUtils.log("Failed to parse subtitle line: $value");
       return BetterPlayerSubtitle._();
     }
+  }
+
+  /// Determines if a WebVTT block should be rejected during individual parsing
+  static bool shouldRejectWebVTTBlock(String value) {
+    final trimmed = value.trim();
+
+    // Reject WEBVTT header
+    if (trimmed == "WEBVTT" || trimmed.startsWith("WEBVTT")) {
+      return true;
+    }
+
+    // Reject NOTE sections
+    if (trimmed.startsWith("NOTE")) {
+      return true;
+    }
+
+    // Check if the block contains timing information (essential for subtitles)
+    if (!trimmed.contains('-->')) {
+      // This block doesn't contain timing info, reject it
+      return true;
+    }
+
+    // Reject metadata lines that don't contain timing information
+    final lines = trimmed.split('\n');
+    if (lines.length <= 2) {
+      // Check if it's a metadata line (contains : but no -->)
+      for (final line in lines) {
+        if (line.contains(':') &&
+            !line.contains('-->') &&
+            !RegExp(r'^\d+$').hasMatch(line.trim())) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   static BetterPlayerSubtitle _handle2LinesSubtitles(List<String> scanner) {
