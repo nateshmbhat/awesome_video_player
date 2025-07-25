@@ -1,3 +1,6 @@
+### 1.1.0
+* Improves performance and makes subtitles configuration optional.
+
 ### 1.0.5
 * fix: improve DateTime validation and expose progress bar by @Mazen-Almortada in #22 
 

@@ -2,7 +2,7 @@ name: awesome_video_player
 description: The name says it all :) Feature Rich Advanced video player for Flutter, supports DRM, Subtitles, Multi-audio/video streams, and is well maintained
 issue_tracker: https://github.com/nateshmbhat/awesome_video_player/issues
 repository: https://github.com/nateshmbhat/awesome_video_player
-version: 1.0.5
+version: 1.1.0
 topics:
   - video
   - videoplayer

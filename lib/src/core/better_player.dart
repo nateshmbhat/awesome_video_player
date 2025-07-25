@@ -70,9 +70,7 @@ class _BetterPlayerState extends State<BetterPlayer>
   void didChangeDependencies() {
     if (!_initialized) {
       final navigator = Navigator.of(context);
-      setState(() {
-        _navigatorState = navigator;
-      });
+      _navigatorState = navigator;
       _setup();
       _initialized = true;
     }
@@ -162,59 +160,20 @@ class _BetterPlayerState extends State<BetterPlayer>
   Widget build(BuildContext context) {
     return BetterPlayerControllerProvider(
       controller: widget.controller,
-      child: _buildPlayer(),
+      child: _InternalPlayer(controller: widget.controller),
     );
-  }
-
-  Widget _buildFullScreenVideo(
-      BuildContext context,
-      Animation<double> animation,
-      BetterPlayerControllerProvider controllerProvider) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        alignment: Alignment.center,
-        color: Colors.black,
-        child: controllerProvider,
-      ),
-    );
-  }
-
-  AnimatedWidget _defaultRoutePageBuilder(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      BetterPlayerControllerProvider controllerProvider) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        return _buildFullScreenVideo(context, animation, controllerProvider);
-      },
-    );
-  }
-
-  Widget _fullScreenRoutePageBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    final controllerProvider = BetterPlayerControllerProvider(
-        controller: widget.controller, child: _buildPlayer());
-
-    final routePageBuilder = _betterPlayerConfiguration.routePageBuilder;
-    if (routePageBuilder == null) {
-      return _defaultRoutePageBuilder(
-          context, animation, secondaryAnimation, controllerProvider);
-    }
-
-    return routePageBuilder(
-        context, animation, secondaryAnimation, controllerProvider);
   }
 
   Future<dynamic> _pushFullScreenWidget(BuildContext context) async {
     final TransitionRoute<void> route = PageRouteBuilder<void>(
       settings: const RouteSettings(),
-      pageBuilder: _fullScreenRoutePageBuilder,
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          _FullScreenPageRouteBuilderWidget(
+        controller: widget.controller,
+        betterPlayerConfiguration: _betterPlayerConfiguration,
+        animation: animation,
+        secondaryAnimation: secondaryAnimation,
+      ),
     );
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -261,21 +220,74 @@ class _BetterPlayerState extends State<BetterPlayer>
         _betterPlayerConfiguration.deviceOrientationsAfterFullScreen);
   }
 
-  Widget _buildPlayer() {
-    return VisibilityDetector(
-      key: Key("${widget.controller.hashCode}_key"),
-      onVisibilityChanged: (VisibilityInfo info) =>
-          widget.controller.onPlayerVisibilityChanged(info.visibleFraction),
-      child: BetterPlayerWithControls(
-        controller: widget.controller,
-      ),
-    );
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     widget.controller.setAppLifecycleState(state);
+  }
+}
+
+class _InternalPlayer extends StatelessWidget {
+  final BetterPlayerController controller;
+
+  const _InternalPlayer({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key("${controller.hashCode}_key"),
+      onVisibilityChanged: (VisibilityInfo info) =>
+          controller.onPlayerVisibilityChanged(info.visibleFraction),
+      child: BetterPlayerWithControls(
+        controller: controller,
+      ),
+    );
+  }
+}
+
+class _FullScreenPageRouteBuilderWidget extends StatelessWidget {
+  final BetterPlayerController controller;
+  final BetterPlayerConfiguration betterPlayerConfiguration;
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+
+  const _FullScreenPageRouteBuilderWidget({
+    required this.controller,
+    required this.betterPlayerConfiguration,
+    required this.animation,
+    required this.secondaryAnimation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final controllerProvider = BetterPlayerControllerProvider(
+      controller: controller,
+      child: _InternalPlayer(controller: controller),
+    );
+
+    final routePageBuilder = betterPlayerConfiguration.routePageBuilder;
+    if (routePageBuilder == null) {
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          return Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Container(
+              alignment: Alignment.center,
+              color: Colors.black,
+              child: controllerProvider,
+            ),
+          );
+        },
+      );
+    }
+
+    return routePageBuilder(
+      context,
+      animation,
+      secondaryAnimation,
+      controllerProvider,
+    );
   }
 }
 
