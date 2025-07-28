@@ -37,6 +37,9 @@ class BetterPlayerSubtitlesConfiguration {
   ///Background color of the subtitle
   final Color backgroundColor;
 
+  /// Enable subtitles. If false, then subtitles will not be displayed.
+  final bool enabled;
+
   const BetterPlayerSubtitlesConfiguration({
     this.fontSize = 14,
     this.fontColor = Colors.white,
@@ -49,5 +52,6 @@ class BetterPlayerSubtitlesConfiguration {
     this.bottomPadding = 20.0,
     this.alignment = Alignment.center,
     this.backgroundColor = Colors.transparent,
+    this.enabled = true,
   });
 }
