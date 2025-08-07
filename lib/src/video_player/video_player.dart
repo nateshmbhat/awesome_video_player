@@ -189,7 +189,6 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   late Completer<void> _initializingCompleter;
   StreamSubscription<dynamic>? _eventSubscription;
 
-  bool get _created => _creatingCompleter.isCompleted;
   Duration? _seekPosition;
 
   /// This is just exposed for testing. It shouldn't be used by anyone depending
@@ -431,10 +430,15 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   /// Starts playing the video.
   ///
+  /// If the video is at the end, this method starts playing from the beginning.
+  ///
   /// This method returns a future that completes as soon as the "play" command
   /// has been sent to the platform, not when playback itself is totally
   /// finished.
   Future<void> play() async {
+    if (value.position == value.duration) {
+      await seekTo(Duration.zero);
+    }
     value = value.copyWith(isPlaying: true);
     await _applyPlayPause();
   }
@@ -453,14 +457,14 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   }
 
   Future<void> _applyLooping() async {
-    if (!_created || _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return;
     }
     await _videoPlayerPlatform.setLooping(_textureId, value.isLooping);
   }
 
   Future<void> _applyPlayPause() async {
-    if (!_created || _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return;
     }
     _timer?.cancel();
@@ -489,19 +493,20 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         },
       );
     } else {
+      _timer?.cancel();
       await _videoPlayerPlatform.pause(_textureId);
     }
   }
 
   Future<void> _applyVolume() async {
-    if (!_created || _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return;
     }
     await _videoPlayerPlatform.setVolume(_textureId, value.volume);
   }
 
   Future<void> _applySpeed() async {
-    if (!_created || _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return;
     }
     await _videoPlayerPlatform.setSpeed(_textureId, value.speed);
@@ -509,7 +514,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   /// The position in the current video.
   Future<Duration?> get position async {
-    if (!value.initialized && _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return null;
     }
     return _videoPlayerPlatform.getPosition(_textureId);
@@ -518,7 +523,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// The absolute position in the current video stream
   /// (i.e. EXT-X-PROGRAM-DATE-TIME in HLS).
   Future<DateTime?> get absolutePosition async {
-    if (!value.initialized && _isDisposed) {
+    if (_isDisposedOrNotInitialized) {
       return null;
     }
     return _videoPlayerPlatform.getAbsolutePosition(_textureId);
@@ -530,7 +535,10 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// If [moment] is outside of the video's full range it will be automatically
   /// and silently clamped.
   Future<void> seekTo(Duration? position) async {
-    _timer?.cancel();
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+
     bool isPlaying = value.isPlaying;
     final int positionInMs = value.position.inMilliseconds;
     final int durationInMs = value.duration?.inMilliseconds ?? 0;
@@ -640,6 +648,8 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   static Future stopPreCache(String url, String? cacheKey) async {
     return _videoPlayerPlatform.stopPreCache(url, cacheKey);
   }
+
+  bool get _isDisposedOrNotInitialized => _isDisposed || !value.initialized;
 }
 
 /// Widget that displays the video controlled by [controller].

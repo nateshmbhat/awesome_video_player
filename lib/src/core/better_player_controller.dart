@@ -470,7 +470,8 @@ class BetterPlayerController {
               _betterPlayerDataSource?.notificationConfiguration?.activityName,
           clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey,
           videoExtension: _betterPlayerDataSource!.videoExtension,
-          allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ?? betterPlayerConfiguration.allowedScreenSleep,
+          allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ??
+              betterPlayerConfiguration.allowedScreenSleep,
         );
 
         break;
@@ -517,7 +518,8 @@ class BetterPlayerController {
               activityName: _betterPlayerDataSource
                   ?.notificationConfiguration?.activityName,
               clearKey: _betterPlayerDataSource?.drmConfiguration?.clearKey,
-              allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ?? betterPlayerConfiguration.allowedScreenSleep);
+              allowedScreenSleep: _betterPlayerDataSource?.allowedScreenSleep ??
+                  betterPlayerConfiguration.allowedScreenSleep);
           _tempFiles.add(file);
         } else {
           throw ArgumentError("Couldn't create file from memory.");
@@ -1279,16 +1281,16 @@ class BetterPlayerController {
   ///Dispose BetterPlayerController. When [forceDispose] parameter is true, then
   ///autoDispose parameter will be overridden and controller will be disposed
   ///(if it wasn't disposed before).
-  void dispose({bool forceDispose = false}) {
+  Future<void> dispose({bool forceDispose = false}) async {
     if (!betterPlayerConfiguration.autoDispose && !forceDispose) {
       return;
     }
     if (!_disposed) {
       if (videoPlayerController != null) {
-        pause();
+        await pause();
         videoPlayerController!.removeListener(_onFullScreenStateChanged);
         videoPlayerController!.removeListener(_onVideoPlayerChanged);
-        videoPlayerController!.dispose();
+        await videoPlayerController!.dispose();
       }
       _eventListeners.clear();
       _nextVideoTimer?.cancel();
