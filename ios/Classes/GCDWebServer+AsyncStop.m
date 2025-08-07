@@ -36,9 +36,10 @@
         
         // Create a new implementation that dispatches to the server's queue
         IMP newIMP = imp_implementationWithBlock(^(id self) {
-            // Get GCDWebServer's private queue using KVO
+            // Get GCDWebServer's private queue using runtime API
             // This queue is where the server normally does its work
-            dispatch_queue_t serverQueue = [self valueForKey:@"_serverQueue"];
+            Ivar queueIvar = class_getInstanceVariable(cls, "_serverQueue");
+            dispatch_queue_t serverQueue = object_getIvar(self, queueIvar);
             
             if (serverQueue) {
                 // If we got the queue, dispatch the stop call to it
