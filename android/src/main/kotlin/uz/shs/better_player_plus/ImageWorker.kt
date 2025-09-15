@@ -28,23 +28,13 @@ class ImageWorker(
                 getBitmapFromInternalURL(imageUrl)
             }
             val fileName = imageUrl.hashCode().toString() + IMAGE_EXTENSION
-            val filePath = applicationContext.cacheDir.absolutePath + "/" + fileName
+            val filePath = applicationContext.cacheDir.absolutePath + fileName
             if (bitmap == null) {
                 return Result.failure()
             }
             val out = FileOutputStream(filePath)
-            try {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            } finally {
-                try {
-                    out.flush()
-                } catch (_: Exception) {
-                }
-                try {
-                    out.close()
-                } catch (_: Exception) {
-                }
-            }
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+
             val data =
                 Data.Builder().putString(BetterPlayerPlugin.FILE_PATH_PARAMETER, filePath).build()
             Result.success(data)
@@ -56,16 +46,14 @@ class ImageWorker(
 
     private fun getBitmapFromExternalURL(src: String): Bitmap? {
         var inputStream: InputStream? = null
-        var connection: HttpURLConnection? = null
         return try {
             val url = URL(src)
-            connection = url.openConnection() as HttpURLConnection
+            var connection = url.openConnection() as HttpURLConnection
             inputStream = connection.inputStream
             val options = BitmapFactory.Options()
             options.inJustDecodeBounds = true
             BitmapFactory.decodeStream(inputStream, null, options)
-            try { inputStream?.close() } catch (_: Exception) {}
-            connection.disconnect()
+            inputStream.close()
 
             connection = url.openConnection() as HttpURLConnection
             inputStream = connection.inputStream
@@ -83,9 +71,6 @@ class ImageWorker(
             } catch (exception: Exception) {
                 Log.e(TAG, "Failed to close bitmap input stream/")
             }
-            try {
-                connection?.disconnect()
-            } catch (_: Exception) {}
         }
     }
 
