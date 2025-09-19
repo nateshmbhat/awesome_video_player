@@ -506,6 +506,15 @@ internal class BetterPlayer(
                 }
             }
 
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT) {
+                    val event: MutableMap<String, Any?> = HashMap()
+                    event["event"] = "looped"
+                    event["key"] = key
+                    eventSink.success(event)
+                }
+            }
+
             override fun onPlayerError(error: PlaybackException) {
                 eventSink.error("VideoError", "Video player had error $error", "")
             }
