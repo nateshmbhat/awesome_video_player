@@ -696,18 +696,18 @@ internal class BetterPlayer(
                         for (groupElementIndex in 0 until group.length) {
                             val label = group.getFormat(groupElementIndex).label
                             if (name == label && index == groupIndex) {
-                                setAudioTrack(rendererIndex, groupIndex)
+                                setAudioTrack(rendererIndex, groupIndex, groupElementIndex)
                                 return
                             }
 
                             ///Fallback option
                             if (!hasStrangeAudioTrack && hasElementWithoutLabel && index == groupIndex) {
-                                setAudioTrack(rendererIndex, groupIndex)
+                                setAudioTrack(rendererIndex, groupIndex, groupElementIndex)
                                 return
                             }
                             ///Fallback option
                             if (hasStrangeAudioTrack && name == label) {
-                                setAudioTrack(rendererIndex, groupIndex)
+                                setAudioTrack(rendererIndex, groupIndex, groupElementIndex)
                                 return
                             }
                         }
@@ -715,24 +715,30 @@ internal class BetterPlayer(
                 }
             }
         } catch (exception: Exception) {
-            Log.e(TAG, "setAudioTrack failed$exception")
+            Log.e(TAG, "setAudioTrack failed " + exception)
         }
     }
 
-    private fun setAudioTrack(rendererIndex: Int, groupIndex: Int) {
+    private fun setAudioTrack(rendererIndex: Int, groupIndex: Int, trackIndex: Int) {
         val mappedTrackInfo = trackSelector.currentMappedTrackInfo
         if (mappedTrackInfo != null) {
-            val builder = trackSelector.parameters.buildUpon()
+            val groups = mappedTrackInfo.getTrackGroups(rendererIndex)
+            if (groupIndex < 0 || groupIndex >= groups.length) return
+            val group = groups.get(groupIndex)
+            if (trackIndex < 0 || trackIndex >= group.length) return
+
+            val builder = trackSelector.parameters
+                .buildUpon()
                 .setRendererDisabled(rendererIndex, false)
-                .addOverride(
+                .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                .setOverrideForType(
                     TrackSelectionOverride(
-                        mappedTrackInfo.getTrackGroups(rendererIndex).get(groupIndex),
-                        mappedTrackInfo.getTrackGroups(rendererIndex)
-                            .indexOf(mappedTrackInfo.getTrackGroups(rendererIndex).get(groupIndex))
+                        group,
+                        listOf(trackIndex)
                     )
                 )
 
-            trackSelector.setParameters(builder)
+            trackSelector.setParameters(builder.build())
         }
     }
 
