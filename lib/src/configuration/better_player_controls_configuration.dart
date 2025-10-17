@@ -79,7 +79,7 @@ class BetterPlayerControlsConfiguration {
   final Widget Function(
     BetterPlayerController controller,
     Function(bool visibility) onPlayerVisibilityChanged,
-    BetterPlayerControlsConfiguration? controlsConfiguration,
+    BetterPlayerControlsConfiguration controlsConfiguration,
   )? customControlsBuilder;
 
   ///Parameter used to change theme of the player
