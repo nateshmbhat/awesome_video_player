@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:awesome_video_player/awesome_video_player.dart';
 import 'package:awesome_video_player/src/configuration/better_player_controller_event.dart';
 import 'package:awesome_video_player/src/controls/better_player_cupertino_controls.dart';
@@ -310,7 +311,10 @@ class _ControlsWidget extends StatelessWidget {
       if (controlsConfiguration.customControlsBuilder != null &&
           playerTheme == BetterPlayerTheme.custom) {
         return controlsConfiguration.customControlsBuilder!(
-            betterPlayerController, onControlsVisibilityChanged);
+          betterPlayerController,
+          onControlsVisibilityChanged,
+          controlsConfiguration,
+        );
       } else if (playerTheme == BetterPlayerTheme.material) {
         return BetterPlayerMaterialControls(
           onControlsVisibilityChanged: onControlsVisibilityChanged,
