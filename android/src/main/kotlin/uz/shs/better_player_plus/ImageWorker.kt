@@ -34,6 +34,7 @@ class ImageWorker(
             }
             val out = FileOutputStream(filePath)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+
             val data =
                 Data.Builder().putString(BetterPlayerPlugin.FILE_PATH_PARAMETER, filePath).build()
             Result.success(data)
@@ -53,6 +54,7 @@ class ImageWorker(
             options.inJustDecodeBounds = true
             BitmapFactory.decodeStream(inputStream, null, options)
             inputStream.close()
+
             connection = url.openConnection() as HttpURLConnection
             inputStream = connection.inputStream
             options.inSampleSize = calculateBitmapInSampleSize(

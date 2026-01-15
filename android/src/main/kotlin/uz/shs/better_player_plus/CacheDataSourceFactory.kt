@@ -24,7 +24,8 @@ internal class CacheDataSourceFactory(
             defaultDatasourceFactory?.createDataSource(),
             FileDataSource(),
             CacheDataSink(betterPlayerCache, maxFileSize),
-            CacheDataSource.FLAG_BLOCK_ON_CACHE or CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
+            // Avoid blocking UI thread if cache is unavailable; ignore cache errors.
+            CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
             null
         )
     }

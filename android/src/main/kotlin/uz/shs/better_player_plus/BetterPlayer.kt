@@ -110,6 +110,8 @@ internal class BetterPlayer(
             this.customDefaultLoadControl.bufferForPlaybackMs,
             this.customDefaultLoadControl.bufferForPlaybackAfterRebufferMs
         )
+        // Do not retain back buffer to minimize memory footprint in list feeds
+        loadBuilder.setBackBuffer(0, /* retainFromKeyframe= */ false)
         loadControl = loadBuilder.build()
         exoPlayer = ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
@@ -504,6 +506,15 @@ internal class BetterPlayer(
                 }
             }
 
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT) {
+                    val event: MutableMap<String, Any?> = HashMap()
+                    event["event"] = "looped"
+                    event["key"] = key
+                    eventSink.success(event)
+                }
+            }
+
             override fun onPlayerError(error: PlaybackException) {
                 eventSink.error("VideoError", "Video player had error $error", "")
             }
@@ -759,6 +770,13 @@ internal class BetterPlayer(
         disposeRemoteNotifications()
         if (isInitialized) {
             exoPlayer?.stop()
+        }
+        // Ensure the player is fully detached from the surface before releasing it
+        try {
+            exoPlayer?.clearVideoSurface()
+            exoPlayer?.setVideoSurface(null)
+        } catch (ignored: Exception) {
+            // no-op
         }
         textureEntry.release()
         eventChannel.setStreamHandler(null)

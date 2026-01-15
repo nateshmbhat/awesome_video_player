@@ -33,19 +33,18 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
     if (bufferingConfiguration == null) {
       response = await _channel.invokeMapMethod<String, dynamic>('create');
     } else {
-      final responseLinkedHashMap = await _channel
-          .invokeMethod<Map?>('create', <String, dynamic>{
-            'minBufferMs': bufferingConfiguration.minBufferMs,
-            'maxBufferMs': bufferingConfiguration.maxBufferMs,
-            'bufferForPlaybackMs': bufferingConfiguration.bufferForPlaybackMs,
-            'bufferForPlaybackAfterRebufferMs':
-                bufferingConfiguration.bufferForPlaybackAfterRebufferMs,
-          });
+      final responseLinkedHashMap =
+          await _channel.invokeMethod<Map?>('create', <String, dynamic>{
+        'minBufferMs': bufferingConfiguration.minBufferMs,
+        'maxBufferMs': bufferingConfiguration.maxBufferMs,
+        'bufferForPlaybackMs': bufferingConfiguration.bufferForPlaybackMs,
+        'bufferForPlaybackAfterRebufferMs':
+            bufferingConfiguration.bufferForPlaybackAfterRebufferMs,
+      });
 
-      response =
-          responseLinkedHashMap != null
-              ? Map<String, dynamic>.from(responseLinkedHashMap)
-              : null;
+      response = responseLinkedHashMap != null
+          ? Map<String, dynamic>.from(responseLinkedHashMap)
+          : null;
     }
     return response?['textureId'] as int?;
   }
@@ -189,9 +188,9 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
     return Duration(
       milliseconds:
           await _channel.invokeMethod<int>('position', <String, dynamic>{
-            'textureId': textureId,
-          }) ??
-          0,
+                'textureId': textureId,
+              }) ??
+              0,
     );
   }
 
@@ -199,9 +198,9 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
   Future<DateTime?> getAbsolutePosition(int? textureId) async {
     final int milliseconds =
         await _channel.invokeMethod<int>('absolutePosition', <String, dynamic>{
-          'textureId': textureId,
-        }) ??
-        0;
+              'textureId': textureId,
+            }) ??
+            0;
     //
 
     const max = 8640000000000000;
@@ -337,6 +336,8 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
           );
         case 'completed':
           return VideoEvent(eventType: VideoEventType.completed, key: key);
+        case 'looped':
+          return VideoEvent(eventType: VideoEventType.looped, key: key);
         case 'bufferingUpdate':
           final List<dynamic> values = map['values'] as List;
 
